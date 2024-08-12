@@ -50,7 +50,7 @@ export default function Home() {
 
   return (
     <RootLayout>
-      <div className="bg-black">
+      <div className="bg-black w-full">
         <Head>
           <link rel="icon" href="/favicon.ico" type="image/x-icon"></link>
           <title>Incity | Empowering Your Journey</title>
@@ -69,7 +69,7 @@ export default function Home() {
           ></meta>
         </Head>
         <main
-          className={`min-h-screen max-w-[100vw] flex-col items-center justify-center px-4 md:px-20 lg:px-24 py-10 lg:py-24 relative`}
+          className={`min-h-screen flex max-w-[100vw] flex-col items-center justify-center px-4 md:px-20 lg:px-24 py-10 lg:py-24 relative`}
         >
           <div
             onClick={handleResume}
@@ -133,7 +133,7 @@ export default function Home() {
             Incity
           </section>
           <section
-            className={`w-full lg:w-[50%] h-auto mt-10 flex items-center justify-center text-center text-sm lg:text-[1.15rem] font-Body text-gray-500 z-5`}
+            className={`w-full h-auto mt-10 flex items-center justify-center text-center text-sm lg:text-[1.15rem] font-Body text-gray-500 z-5`}
           >
             <p>
               Welcome to Incity, where we enhance your daily life with
