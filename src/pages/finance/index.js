@@ -1,72 +1,55 @@
-// finance.js
 import React, { useState, useRef, useEffect } from 'react';
 import { MdOutlineChat } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai'; // Import the Generative AI SDK
 
-const Finance = ({ toggleChat = () => {} }) => {
-  // Chat state
+const FinanceBot = ({ toggleChat = () => {} }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationObject, setConversationObject] = useState(null);
+  const [genAI, setGenAI] = useState(null);
+  const [chatSession, setChatSession] = useState(null);
 
-  // Popup ref
   const chatRef = useRef(null);
 
-  // Handler for opening/closing the popup
-  const handleInput = (e) => {
-    setMessageInput(e.target.value);
-  };
-
-  const handleChatInput = async () => {
-    const message = messageInput;
-    if (messageInput === '') return;
-
-    setLoading(true);
-    try {
-      const apiResponse = await axios.post('/api/message', {
-        message,
-        conversation: conversationObject
-      });
-
-      const apiData = apiResponse?.data;
-      if (apiResponse.status === 403) {
-        updateChatHistory(apiData?.text);
-        return;
-      }
-
-      updateChatHistory(apiData?.data || apiData?.text);
-      setMessageInput('');
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setLoading(false);
-    }
-  };
-
-  const updateChatHistory = (message) => {
-    const formattedMessage = message.replace(/```html/g, '').replace(/```/g, '').trim();
-    const newHistory = [
-      ...chatHistory,
-      { role: 'user', parts: [messageInput] },
-      { role: 'model', parts: [formattedMessage] }
-    ];
-    setChatHistory(newHistory);
-    setLoading(false);
-  };
-
+  // Initialize the Generative AI model
   const initializeChatbot = async () => {
     setLoading(true);
     try {
-      const apiResponse = await axios.post('/api/message', {
-        message: '',
-        conversation: null
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: `
+          Finance Bot Instructions
+          1. Introduction
+          Bot: "Hello! I'm your Finance Bot. I can help you plan your salary and manage your finances. Let's start by gathering some details about your income and expenses."
+          2. Collect User Details
+          Bot: "Please provide your monthly salary."
+          3. Budget Planning
+          Bot: "Based on your salary and expenses, I will suggest how to allocate your budget."
+          4. Expense Tracking
+          Bot: "Please categorize your expenses into needs, wants, and savings."
+          5. Savings Recommendations
+          Bot: "To help you achieve your savings goals, I recommend saving a percentage of your income each month."
+          6. Investment Advice
+          Bot: "If you're interested, I can suggest some basic investment options based on your savings."
+          7. Closing
+          Bot: "Thank you for using the Finance Bot. If you have any more questions or need further assistance, feel free to ask!"
+        `,
       });
 
+      const session = model.startChat({
+        history: chatHistory.map(message => ({
+          role: message.role,
+          content: message.parts.join(''),
+        })),
+      });
+
+      setGenAI(model);
+      setChatSession(session);
       setChatHistory([
-        { role: 'model', parts: ['Hello! I\'m your Finance Bot. I can help you plan your salary and manage your finances. Let\'s start by gathering some details about your income and expenses.'] }
+        { role: 'model', parts: ['Hi, I am your Finance Bot. How can I assist you today?'] }
       ]);
-      setConversationObject(apiResponse.data.conversation);
     } catch (error) {
       console.error("Error initializing chatbot:", error);
     } finally {
@@ -78,6 +61,31 @@ const Finance = ({ toggleChat = () => {} }) => {
     initializeChatbot();
   }, []);
 
+  const handleInput = (e) => {
+    setMessageInput(e.target.value);
+  };
+
+  const handleChatInput = async () => {
+    if (messageInput === '' || !genAI || !chatSession) return;
+
+    setLoading(true);
+    try {
+      const result = await chatSession.sendMessage(messageInput);
+      const responseText = result.response.text();
+
+      setChatHistory([
+        ...chatHistory,
+        { role: 'user', parts: [messageInput] },
+        { role: 'model', parts: [responseText] }
+      ]);
+      setMessageInput('');
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className='fixed inset-0 flex items-center justify-center z-20'>
       <div
@@ -85,11 +93,13 @@ const Finance = ({ toggleChat = () => {} }) => {
         onClick={() => { toggleChat(); }}
       />
       <div ref={chatRef} className='fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono'>
-       
+        <button onClick={() => { toggleChat(); }} className='absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono'>
+          <FaWindowClose size={28} />
+        </button>
         <div className='flex flex-col gap-2 h-full overflow-y-auto'>
           {chatHistory.map((message, index) => (
             <div key={message.role + index} className={`text-xl ${message.role === 'user' ? 'text-fuchsia-500' : 'text-cyan-300'} snap-end`}>
-              {`${message.role === 'user' ? 'You' : 'Finance Bot'}: ${message.parts}`}
+              {`${message.role === 'user' ? 'You' : 'Finance Bot'}: ${message.parts.join('')}`}
             </div>
           ))}
           {loading && <div className='text-center'>Loading...</div>}
@@ -116,4 +126,4 @@ const Finance = ({ toggleChat = () => {} }) => {
   );
 };
 
-export default Finance;
+export default FinanceBot;

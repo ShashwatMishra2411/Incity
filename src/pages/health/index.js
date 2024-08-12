@@ -1,71 +1,55 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MdOutlineChat } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai'; // Import the Generative AI SDK
 
-const Health = ({ toggleChat = () => {} }) => {
-  // Chat state
+const HealthcareBot = ({ toggleChat = () => {} }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationObject, setConversationObject] = useState(null);
+  const [genAI, setGenAI] = useState(null);
+  const [chatSession, setChatSession] = useState(null);
 
-  // Popup ref
   const chatRef = useRef(null);
 
-  // Handler for opening/closing the popup
-  const handleInput = (e) => {
-    setMessageInput(e.target.value);
-  };
-
-  const handleChatInput = async () => {
-    const message = messageInput;
-    if (messageInput === '') return;
-
-    setLoading(true);
-    try {
-      const apiResponse = await axios.post('/api/message', {
-        message,
-        conversation: conversationObject
-      });
-
-      const apiData = apiResponse?.data;
-      if (apiResponse.status === 403) {
-        updateChatHistory(apiData?.text);
-        return;
-      }
-
-      updateChatHistory(apiData?.data || apiData?.text);
-      setMessageInput('');
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setLoading(false);
-    }
-  };
-
-  const updateChatHistory = (message) => {
-    const formattedMessage = message.replace(/```html/g, '').replace(/```/g, '').trim();
-    const newHistory = [
-      ...chatHistory,
-      { role: 'user', parts: [messageInput] },
-      { role: 'model', parts: [formattedMessage] }
-    ];
-    setChatHistory(newHistory);
-    setLoading(false);
-  };
-
+  // Initialize the Generative AI model
   const initializeChatbot = async () => {
     setLoading(true);
     try {
-      const apiResponse = await axios.post('/api/message', {
-        message: '',
-        conversation: null
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: `
+          Health Bot Instructions
+          1. Introduction
+          Bot: "Hello! I'm your Health Bot. I'm here to help you with health-related questions and provide guidance on your concerns. Let's start by discussing your current health issue or question."
+          2. Collect Health Details
+          Bot: "Please describe your health concern or symptoms in detail."
+          3. Health Assessment
+          Bot: "Based on the information you provide, I'll assess potential causes and suggest possible actions you can take."
+          4. Symptom Categorization
+          Bot: "Please categorize your symptoms into types such as pain, discomfort, or unusual symptoms."
+          5. Health Recommendations
+          Bot: "To address your health concern, I recommend specific actions or lifestyle changes based on your symptoms."
+          6. Further Advice
+          Bot: "If needed, I can suggest additional steps or direct you to professional resources for more comprehensive care."
+          7. Closing
+          Bot: "Thank you for using the Health Bot. If you have more questions or need further assistance, feel free to ask!"
+        `,
       });
 
+      const session = model.startChat({
+        history: chatHistory.map(message => ({
+          role: message.role,
+          content: message.parts.join(''),
+        })),
+      });
+
+      setGenAI(model);
+      setChatSession(session);
       setChatHistory([
-        { role: 'model', parts: ['Hi, I am Incity. How can I help you?'] }
+        { role: 'model', parts: ['Hi, I am your Health Bot. How can I assist you with your health today?'] }
       ]);
-      setConversationObject(apiResponse.data.conversation);
     } catch (error) {
       console.error("Error initializing chatbot:", error);
     } finally {
@@ -77,37 +61,29 @@ const Health = ({ toggleChat = () => {} }) => {
     initializeChatbot();
   }, []);
 
-  // Function to format response
-  const formatResponse = (response) => {
-    const causes = Array.isArray(response.causes) ? response.causes : [];
-    const actions = Array.isArray(response.actions) ? response.actions : [];
+  const handleInput = (e) => {
+    setMessageInput(e.target.value);
+  };
 
-    return (
-      <>
-        <div className='font-bold text-lg'>Health Concern:</div>
-        <div className='mt-1 mb-2'>{response.concern || 'N/A'}</div>
-        <div className='font-bold text-lg'>Potential Causes:</div>
-        <ul className='list-disc ml-5'>
-          {causes.length > 0 ? (
-            causes.map((cause, index) => (
-              <li key={index}>{cause}</li>
-            ))
-          ) : (
-            <li>No potential causes available.</li>
-          )}
-        </ul>
-        <div className='font-bold text-lg'>Recommended Actions:</div>
-        <ul className='list-disc ml-5'>
-          {actions.length > 0 ? (
-            actions.map((action, index) => (
-              <li key={index}>{action}</li>
-            ))
-          ) : (
-            <li>No recommended actions available.</li>
-          )}
-        </ul>
-      </>
-    );
+  const handleChatInput = async () => {
+    if (messageInput === '' || !genAI || !chatSession) return;
+
+    setLoading(true);
+    try {
+      const result = await chatSession.sendMessage(messageInput);
+      const responseText = result.response.text();
+
+      setChatHistory([
+        ...chatHistory,
+        { role: 'user', parts: [messageInput] },
+        { role: 'model', parts: [responseText] }
+      ]);
+      setMessageInput('');
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -117,11 +93,13 @@ const Health = ({ toggleChat = () => {} }) => {
         onClick={() => { toggleChat(); }}
       />
       <div ref={chatRef} className='fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono'>
-       
+        <button onClick={() => { toggleChat(); }} className='absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono'>
+          <FaWindowClose size={28} />
+        </button>
         <div className='flex flex-col gap-2 h-full overflow-y-auto'>
           {chatHistory.map((message, index) => (
             <div key={message.role + index} className={`text-xl ${message.role === 'user' ? 'text-fuchsia-500' : 'text-cyan-300'} snap-end`}>
-              {`${message.role === 'user' ? 'You' : 'Incity'}: ${message.parts}`}
+              {`${message.role === 'user' ? 'You' : 'Health Bot'}: ${message.parts.join('')}`}
             </div>
           ))}
           {loading && <div className='text-center'>Loading...</div>}
@@ -148,4 +126,4 @@ const Health = ({ toggleChat = () => {} }) => {
   );
 };
 
-export default Health;
+export default HealthcareBot;
