@@ -13,6 +13,7 @@
     "@octokit/core": "^5.0.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@react-google-maps/api": "^2.19.3",
     "@tailwindcss/typography": "^0.5.9",
     "@upstash/ratelimit": "^1.0.1",
     "@upstash/redis": "^1.28.4",
