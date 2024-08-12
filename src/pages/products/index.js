@@ -1,134 +1,167 @@
-import React, { useState, useRef, useEffect } from "react";
-import { MdOutlineChat } from "react-icons/md";
-import { GoogleAIFileManager } from "@google/generative-ai/"; // Updated import path
+import React, { useState, useRef } from "react";
 import axios from "axios";
+import { MdSearch, MdOutlineChat } from "react-icons/md";
+import { FaWindowClose } from "react-icons/fa";
+import Image from "next/image";
+import Loader from "@/components/Loader";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import ReactMarkDown from "react-markdown";
 import RootLayout from "../layout";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CameraIcon } from "lucide-react";
-const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
+
+// Create your API key here https://aistudio.google.com/app/apikey
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+console.log(API_KEY);
 const Health = ({ toggleChat = () => {} }) => {
-  const [image, setImage] = useState(null);
+  // Chat state
   const [chatHistory, setChatHistory] = useState([]);
   const [messageInput, setMessageInput] = useState("");
+  const [file, setFile] = useState(null);
+  const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [conversationObject, setConversationObject] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Popup ref
   const chatRef = useRef(null);
+
+  const genAI = new GoogleGenerativeAI(API_KEY);
+
+  const fileToGenerativePart = async (file) => {
+    const base64EncodedDataPromise = new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(",")[1]);
+      reader.readAsDataURL(file);
+    });
+    return {
+      inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+    };
+  };
+
+  const fetchDataProVision = async () => {
+    if (!file || !prompt) {
+      alert("Please select an image and enter a prompt");
+      return;
+    }
+    setResponse(null);
+    setLoading(true);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    try {
+      const imageParts = await fileToGenerativePart(file);
+      const result = await model.generateContent([prompt, imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      setLoading(false);
+      setResponse(text);
+      setPrompt("");
+    } catch (error) {
+      setError(`Oops, an error occurred: ${error}`);
+      console.log(error);
+    }
+  };
+
+  const handleChatInput = async () => {
+    const message = messageInput.trim();
+    if (message === "") return;
+
+    setLoading(true);
+    setMessageInput("");
+    try {
+      updateChatHistory(`Searching for recipes with ${message}...`);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const updateChatHistory = (message, recipeData = null) => {
+    const newHistory = [
+      ...chatHistory,
+      { role: "user", parts: [messageInput] },
+      { role: "model", parts: [message] },
+    ];
+
+    if (recipeData) {
+      newHistory.push({
+        role: "model",
+        parts: recipeData.map((recipe) => (
+          <div
+            key={recipe.idMeal}
+            className="border border-gray-300 p-2 rounded-md mb-2"
+          >
+            <img
+              src={recipe.strMealThumb}
+              alt={recipe.strMeal}
+              className="w-full h-24 object-cover rounded-md"
+            />
+            <h3 className="mt-2 text-lg font-bold">{recipe.strMeal}</h3>
+            <a
+              href={`https://www.themealdb.com/meal/${recipe.idMeal}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              View Recipe
+            </a>
+          </div>
+        )),
+      });
+    }
+
+    setChatHistory(newHistory);
+    setLoading(false);
+  };
 
   const handleInput = (e) => {
     setMessageInput(e.target.value);
   };
 
-  const handleChatInput = async () => {
-    if (image) {
-      const message = messageInput;
-      const uploadResponse = await fileManager.uploadFile(image, {
-        mimeType: "image/png",
-        displayName: "Jetpack drawing",
-      });
-      console.log(uploadResponse);
-      if (messageInput === "") return;
-      setLoading(true);
-      try {
-        console.log(image);
-        const apiResponse = await axios.post(
-          "/api/products",
-          {
-            message,
-            conversation: conversationObject,
-            image,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-        const apiData = apiResponse?.data;
-        if (apiResponse.status === 403) {
-          updateChatHistory(apiData?.text);
-          return;
-        }
-
-        updateChatHistory(apiData?.data || apiData?.text);
-        setMessageInput("");
-      } catch (error) {
-        console.error("Error sending message:", error);
-        setLoading(false);
-      }
+    if (file && allowedTypes.includes(file.type)) {
+      setFile(file);
+    } else {
+      alert("Please select a valid image file");
+      event.target.value = null;
     }
   };
 
-  const updateChatHistory = (message) => {
-    const formattedMessage = message
-      .replace(/```html/g, "")
-      .replace(/```/g, "")
-      .trim();
-    const newHistory = [
-      ...chatHistory,
-      { role: "user", parts: [messageInput] },
-      { role: "model", parts: [formattedMessage] },
-    ];
-    setChatHistory(newHistory);
-    setLoading(false);
+  const handlePromptChange = (event) => {
+    setPrompt(event.target.value);
   };
 
-  const initializeChatbot = async () => {
+  const handleImageProcessing = async () => {
+    if (!file || !prompt) {
+      alert("Please select an image and enter a prompt");
+      return;
+    }
+    setResponse(null);
     setLoading(true);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction:
+        'Objective: Provide users with specific product recommendations for enhancing their environment based on a provided photo.\n\nInstructions:\n\n1. Analyze the provided photo and suggest specific products that could improve the space.\n2. Return the results as a raw JSON array with the following fields for each product:\n   - `name`: The name of the product.\n   - `imageLink`: A link to an image of the product.\n   - `ProductLink`: A link to purchase the product.\n   - `Description`: A brief description of the product.\n   - `HowItwouldBenefitTheSpaceProvidedIntheImage`: An explanation of how the product would enhance the environment shown in the photo.\n3. Do not include any additional text, explanations, or Markdown formatting. Only provide the JSON array.\n\nExample:\n\n[\n  {\n    "name": "Decorative Throw Pillow",\n    "imageLink": "[image-link]",\n    "ProductLink": "[purchase-link]",\n    "Description": "A vibrant throw pillow to add color and texture.",\n    "HowItwouldBenefitTheSpaceProvidedIntheImage": "Adds a pop of color to neutral decor, making the space more lively."\n  },\n  {\n    "name": "Floor Lamp",\n    "imageLink": "[image-link]",\n    "ProductLink": "[purchase-link]",\n    "Description": "A stylish floor lamp to brighten up the room.",\n    "HowItwouldBenefitTheSpaceProvidedIntheImage": "Improves lighting in the room, making it more inviting and functional."\n  }\n]\n',
+    });
+
     try {
-      const apiResponse = await axios.post("/api/products", {
-        message: "",
-        conversation: null,
-        image: null,
-      });
-
-      setChatHistory([
-        { role: "model", parts: ["Hi, I am Incity. How can I help you?"] },
-      ]);
-      setConversationObject(apiResponse.data.conversation);
-    } catch (error) {
-      console.error("Error initializing chatbot:", error);
-    } finally {
+      const imageParts = await fileToGenerativePart(file);
+      const result = await model.generateContent([prompt, imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      const parsedResponse = JSON.parse(text);
       setLoading(false);
+      setResponse(parsedResponse);
+      setPrompt("");
+    } catch (error) {
+      setError(`Oops, an error occurred: ${error}`);
+      console.log(error);
     }
-  };
-
-  useEffect(() => {
-    initializeChatbot();
-  }, []);
-
-  const formatResponse = (response) => {
-    const causes = Array.isArray(response.causes) ? response.causes : [];
-    const actions = Array.isArray(response.actions) ? response.actions : [];
-
-    return (
-      <>
-        <div className="font-bold text-lg">Health Concern:</div>
-        <div className="mt-1 mb-2">{response.concern || "N/A"}</div>
-        <div className="font-bold text-lg">Potential Causes:</div>
-        <ul className="list-disc ml-5">
-          {causes.length > 0 ? (
-            causes.map((cause, index) => <li key={index}>{cause}</li>)
-          ) : (
-            <li>No potential causes available.</li>
-          )}
-        </ul>
-        <div className="font-bold text-lg">Recommended Actions:</div>
-        <ul className="list-disc ml-5">
-          {actions.length > 0 ? (
-            actions.map((action, index) => <li key={index}>{action}</li>)
-          ) : (
-            <li>No recommended actions available.</li>
-          )}
-        </ul>
-      </>
-    );
   };
 
   return (
     <RootLayout>
-      <div className="fixed basis-10/12 inset-0 flex items-center justify-center z-20">
+      <div className="fixed inset-0 flex items-center pl-72 justify-center z-20">
         <div
           className="fixed inset-0 bg-gray-900 bg-opacity-75 z-5"
           onClick={() => {
@@ -137,61 +170,81 @@ const Health = ({ toggleChat = () => {} }) => {
         />
         <div
           ref={chatRef}
-          className="fixed flex flex-col w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono"
+          className="fixed w-[40rem] h-[40rem] backdrop-blur-lg bg-black/10 border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70"
         >
+          <button
+            onClick={() => {
+              toggleChat();
+            }}
+            className="absolute -top-5 -right-5 z-10 text-red-500 p-2"
+          >
+            <FaWindowClose size={28} />
+          </button>
           <div className="flex flex-col gap-2 h-full overflow-y-auto">
             {chatHistory.map((message, index) => (
               <div
-                key={message.role + index}
+                key={index}
                 className={`text-xl ${
                   message.role === "user" ? "text-fuchsia-500" : "text-cyan-300"
-                } snap-end`}
-              >
-                {`${message.role === "user" ? "You" : "Incity"}: ${
-                  message.parts
                 }`}
+              >
+                {message.parts}
               </div>
             ))}
-            {loading && <div className="text-center">Loading...</div>}
-          </div>
-          <div className="flex rounded-lg bg-white items-center justify-between">
-            <div className="flex w-full h-full justify-between items-center">
+            {loading && <Loader />}
+            {error && <div className="text-red-500">{error}</div>}
+            {response && (
+              <div className="text-cyan-300">
+                {response.map((product, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-300 p-2 rounded-md mb-2"
+                  >
+                    {/* <img
+                    src={product.imageLink}
+                    alt={product.name}
+                    className="w-full h-24 object-cover rounded-md"
+                  /> */}
+                    <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
+                    <p className="text-white">{product.Description}</p>
+                    <p>
+                      <strong>Benefit:</strong>{" "}
+                      {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
+                    </p>
+                    <a
+                      href={product.ProductLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      Buy Now
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-4">
               <input
-                disabled={loading}
-                className="w-full h-full px-2 border-gray-300  text-gray-700 border-none rounded-md focus:outline-none"
-                placeholder="Type your message"
-                onKeyDown={(e) =>
-                  e.key === "Enter" ? handleChatInput() : null
-                }
-                onChange={handleInput}
-                value={messageInput}
+                className="w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
+                type="text"
+                placeholder="Enter prompt for image"
+                value={prompt}
+                onChange={handlePromptChange}
               />
-              <Label htmlFor="picture">
-                <CameraIcon size={32} className="cursor-pointer"></CameraIcon>
-              </Label>
-              <Input
-                id="picture"
-                disabled={
-                  image === null || image === undefined || image === ""
-                    ? false
-                    : true
-                }
-                onChange={(e) => {
-                  console.log(e.target.files[0]);
-                  setImage(e.target.files[0]);
-                }}
+              <input
+                className="w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
                 type="file"
-                className=" hidden"
+                accept="image/*"
+                onChange={handleFileChange}
               />
+              <button
+                className="bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
+                onClick={handleImageProcessing}
+                disabled={loading}
+              >
+                Process Image
+              </button>
             </div>
-
-            <button
-              className={`bg-[rgba(29,71,253,1)] px-4 py-2 text-white rounded-md shadow-md hover:bg-[#1d46fdd5] disabled:bg-slate-500 focus:outline-none ml-4`}
-              disabled={messageInput === "" || loading}
-              onClick={() => handleChatInput()}
-            >
-              <MdOutlineChat size={24} />
-            </button>
           </div>
         </div>
       </div>
