@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { FaSearch } from 'react-icons/fa'; // Import search icon
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Ensure this is correctly imported
+import { useSearchParams } from 'next/navigation';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API;
 
 const useGoogleMapsApi = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-
-  
-  
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.google) {
@@ -33,6 +31,9 @@ function Hotels() {
   const [searchType, setSearchType] = useState('restaurant'); // Default place type
   const [inputValue, setInputValue] = useState('');
   const [map, setMap] = useState(null);
+
+  const searchParams = useSearchParams(); // Get the query parameters
+  const queryParam = searchParams.get('query'); // Get the specific 'query' parameter
 
   const typeref = {
     "categories": {
@@ -368,6 +369,32 @@ function Hotels() {
     });
   };
 
+  const processSearchType = async (query) => {
+    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    // Stringify the typeref object for use in the prompt
+    const typerefString = JSON.stringify(typeref);
+
+    const prompt = `Here are the categories and keys, with reference to the input received give back the closest key to the input. Just return the key and nothing else. For example, if I input "books", return "book_store" which is a key.:\n${typerefString}\nAnd the input text is "${query}".`;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const geminiResponseText = await result.response.text();
+      const closestKey = geminiResponseText.trim(); // Trim any unnecessary whitespace
+      setSearchType(closestKey);
+    } catch (error) {
+      console.error('Error processing Gemini AI response:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (queryParam) {
+      setInputValue(queryParam); // Set input value from query
+      processSearchType(queryParam); // Process search type based on query
+    }
+  }, [queryParam]);
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -389,26 +416,10 @@ function Hotels() {
     initMap();
   }, [initMap]);
 
-  const handleSearch = async(event) => {
+  const handleSearch = async (event) => {
     event.preventDefault();
-  
-    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  
-    // Stringify the typeref object for use in the prompt
-    const typerefString = JSON.stringify(typeref);
-  
-    const prompt = `Here are the categories and keys, with reference to the input received give back the closest key to the input. Just return the key and nothing else. For example, if I input "books", return "book_store" which is a key.:\n${typerefString}\nAnd the input text is "${inputValue}".`;
-  
-    try {
-      const result = await model.generateContent(prompt);
-      const geminiResponseText = result.response.text();
-      setSearchType(geminiResponseText.trim()); // Trim any unnecessary whitespace
-    } catch (error) {
-      console.error('Error processing Gemini AI response:', error);
-    }
+    processSearchType(inputValue); // Process search type based on manual input
   };
-  
 
   return (
     <div className="p-4">
