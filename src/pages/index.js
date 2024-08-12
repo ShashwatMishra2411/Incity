@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useRef } from "react";
 import { useEffect, useState } from "react";
 import Chatbot from "@/components/Chatbot";
+import Sidebar from "@/components/Sidebar";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-black">
       <Head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon"></link>
         <title>Incity | Empowering Your Journey</title>
@@ -66,19 +67,21 @@ export default function Home() {
         ></meta>
       </Head>
       <main
-        className={`flex min-h-screen max-w-[100vw] flex-col items-center justify-center px-4 md:px-20 lg:px-24 py-10 lg:py-24 relative`}
+        className={`min-h-screen max-w-[100vw] flex-col items-center justify-center px-4 md:px-20 lg:px-24 py-10 lg:py-24 relative`}
       >
-        <div onClick={handleResume} className={`absolute w-16 md:w-24 aspect-square object-contain bottom-10 right-6 bg-transparent cursor-pointer text-white hover:scale-110 animate-spin-slow hover:animate-spin-slower`}>
+        <div
+          onClick={handleResume}
+          className={`absolute w-16 md:w-24 aspect-square object-contain bottom-10 right-6 bg-transparent cursor-pointer text-white hover:scale-110 animate-spin-slow hover:animate-spin-slower`}
+        >
           <img src="/hire.png" alt="hire me" className={`h-full`} />
         </div>
-        {isOpen ? <Chatbot toggleChat={toggleChat} geminiApiKey={GEMINI_API_KEY} /> : null}
+        {isOpen ? (
+          <Chatbot toggleChat={toggleChat} geminiApiKey={GEMINI_API_KEY} />
+        ) : null}
         <section
           className={`w-full h-auto mb-10 flex items-center justify-center gap-8 text-sm md:text-md lg:text-[1.5rem] font-Mono text-gray-500 z-5`}
         >
-          <Link
-            href={`/maps`}
-            className={`hover:text-gray-300 cursor-pointer`}
-          >
+          <Link href={`/maps`} className={`hover:text-gray-300 cursor-pointer`}>
             Maps
           </Link>
           <Link
@@ -87,13 +90,13 @@ export default function Home() {
           >
             Health Support
           </Link>
-          <Link href={`/recipes`} className={`hover:text-gray-300 cursor-pointer`}>
-            Recipes
-          </Link>
           <Link
-            href={`/news`}
+            href={`/recipes`}
             className={`hover:text-gray-300 cursor-pointer`}
           >
+            Recipes
+          </Link>
+          <Link href={`/news`} className={`hover:text-gray-300 cursor-pointer`}>
             News
           </Link>
           <Link
@@ -125,7 +128,9 @@ export default function Home() {
           className={`w-full lg:w-[50%] h-auto mt-10 flex items-center justify-center text-center text-sm lg:text-[1.15rem] font-Body text-gray-500 z-5`}
         >
           <p>
-            Welcome to Incity, where we enhance your daily life with personalized information on maps, health support, recipes, news, and weather. <br />
+            Welcome to Incity, where we enhance your daily life with
+            personalized information on maps, health support, recipes, news, and
+            weather. <br />
             <span
               className={`text-gray-50 cursor-pointer font-Mono`}
               onClick={redirect}
