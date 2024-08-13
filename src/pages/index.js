@@ -88,13 +88,13 @@ export default function Home() {
               href={`/maps`}
               className={`hover:text-gray-300 cursor-pointer`}
             >
-              Maps
+              Places
             </Link>
             <Link
               href={`/health`}
               className={`hover:text-gray-300 cursor-pointer`}
             >
-              Health Support
+              Health
             </Link>
             <Link
               href={`/recipes`}
@@ -119,6 +119,12 @@ export default function Home() {
               className={`hover:text-gray-300 cursor-pointer`}
             >
               Finance
+            </Link>
+            <Link
+              href={`/products`}
+              className={`hover:text-gray-300 cursor-pointer`}
+            >
+              Products
             </Link>
             <Link
               href={`/contact`}

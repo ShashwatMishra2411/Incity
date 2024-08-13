@@ -1,16 +1,14 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { MdSearch, MdOutlineChat } from 'react-icons/md';
+import { MdSearch } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
 import Image from 'next/image';
 import Loader from '@/components/Loader';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Create your API key here https://aistudio.google.com/app/apikey
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 const RecipeChatbot = ({ toggleChat = () => {} }) => {
-  // Chat state
   const [chatHistory, setChatHistory] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [file, setFile] = useState(null);
@@ -19,9 +17,7 @@ const RecipeChatbot = ({ toggleChat = () => {} }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Popup ref
   const chatRef = useRef(null);
-
   const genAI = new GoogleGenerativeAI(API_KEY);
 
   const fileToGenerativePart = async (file) => {
@@ -52,8 +48,7 @@ const RecipeChatbot = ({ toggleChat = () => {} }) => {
       setLoading(false);
       setResponse(text);
       setPrompt('');
-      // Use the response to fetch possible dishes
-      handleSearch(text); // Update this to match the structure of your generated text
+      handleSearch(text);
     } catch (error) {
       setError(`Oops, an error occurred: ${error}`);
       console.log(error);
@@ -163,8 +158,7 @@ const RecipeChatbot = ({ toggleChat = () => {} }) => {
       setLoading(false);
       setResponse(text);
       setPrompt('');
-      // Use the response to fetch possible dishes
-      handleSearch(text); // Update this to match the structure of your generated text
+      handleSearch(text);
     } catch (error) {
       setError(`Oops, an error occurred: ${error}`);
       console.log(error);
@@ -177,35 +171,46 @@ const RecipeChatbot = ({ toggleChat = () => {} }) => {
         className='fixed inset-0 bg-gray-900 bg-opacity-75 z-5'
         onClick={() => { toggleChat(); }}
       />
-      <div ref={chatRef} className='fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70'>
-        <button onClick={() => { toggleChat(); }} className='absolute -top-5 -right-5 z-10 text-red-500 p-2'>
+      <div ref={chatRef} className='fixed w-full max-w-lg h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70'>
+        <button onClick={() => { toggleChat(); }} className='absolute top-2 right-2 z-10 text-red-500 p-2'>
           <FaWindowClose size={28} />
         </button>
         <div className='flex flex-col gap-2 h-full overflow-y-auto'>
           {chatHistory.map((message, index) => (
-            <div key={index} className={`text-xl ${message.role === 'user' ? 'text-fuchsia-500' : 'text-cyan-300'}`}>
+            <div key={index} className={`text-lg px-4 py-2 rounded-md ${message.role === 'user' ? 'bg-fuchsia-500 text-white self-end' : 'bg-cyan-300 text-black self-start'}`}>
               {message.parts}
             </div>
           ))}
           {loading && <Loader />}
           {error && <div className='text-red-500'>{error}</div>}
           {response && <div className='text-cyan-300'>Response: {response}</div>}
+          {file && (
+            <div className='mt-4'>
+              <Image
+                src={URL.createObjectURL(file)}
+                alt='Selected file'
+                width={300}
+                height={200}
+                className='rounded-md'
+              />
+            </div>
+          )}
           <div className='mt-4'>
             <input
-              className='w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none'
+              className='w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none focus:ring focus:border-blue-300'
               type='text'
               placeholder='Enter prompt for image'
               value={prompt}
               onChange={handlePromptChange}
             />
             <input
-              className='w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none'
+              className='w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none focus:ring focus:border-blue-300'
               type='file'
               accept='image/*'
               onChange={handleFileChange}
             />
             <button
-              className='bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4'
+              className='w-full bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4 transition-colors duration-200'
               onClick={handleImageProcessing}
               disabled={loading}
             >
@@ -215,14 +220,14 @@ const RecipeChatbot = ({ toggleChat = () => {} }) => {
           <div className='flex items-center justify-between mt-4'>
             <input
               disabled={loading}
-              className='w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none'
+              className='w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none focus:ring focus:border-blue-300'
               placeholder='Type your ingredient'
               onKeyDown={(e) => (e.key === 'Enter' ? handleChatInput() : null)}
               onChange={handleInput}
               value={messageInput}
             />
             <button
-              className={`bg-blue-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-blue-600 disabled:bg-slate-500 focus:outline-none ml-4`}
+              className={`bg-blue-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none ml-4 transition-transform transform-gpu ${loading ? 'scale-95' : 'hover:scale-105'}`}
               disabled={messageInput === '' || loading}
               onClick={() => handleChatInput()}
             >
