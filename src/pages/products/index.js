@@ -132,11 +132,6 @@ const Health = ({ toggleChat = () => {} }) => {
     }
   };
 
-  const { Place } = google.maps.importLibrary('places');
-
-// Use a place ID to create a new Place instance.
-
-
   const handlePromptChange = (event) => {
     setPrompt(event.target.value);
   };
@@ -214,12 +209,15 @@ const Health = ({ toggleChat = () => {} }) => {
                   key={index}
                   className="border border-gray-300 p-2 rounded-md mb-2"
                 >
-                  <a href={`/places?query=${product.name.replace(/\s+/g, '_')}`}><h3 className="mt-2 text-lg font-bold">{product.name}</h3>
-                  <p className="text-white">{product.Description}</p>
-                  <p>
-                    <strong>Benefit:</strong>{" "}
-                    {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
-                  </p>
+                  <a
+                    href={`/places?query=${product.name.replace(/\s+/g, "_")}`}
+                  >
+                    <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
+                    <p className="text-white">{product.Description}</p>
+                    <p>
+                      <strong>Benefit:</strong>{" "}
+                      {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
+                    </p>
                   </a>
                   <a
                     href={product.ProductLink}
@@ -234,7 +232,7 @@ const Health = ({ toggleChat = () => {} }) => {
             </div>
           )}
         </div>
-        <div className="flex p-2 bg-white rounded-md px-2 justify-between items-center">
+        <div className="flex mx-4 p-2 bg-white rounded-md px-2 justify-between items-center">
           <input
             className="w-full border-none border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
             type="text"
@@ -254,7 +252,7 @@ const Health = ({ toggleChat = () => {} }) => {
           ></Input>
         </div>
         <Button
-          className="bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
+          className="bg-green-500 mx-4 py-2 mb-2 text-white text-2xl font-bold rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
           onClick={handleImageProcessing}
           disabled={loading}
         >
