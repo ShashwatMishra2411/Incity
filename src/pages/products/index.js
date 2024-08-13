@@ -3,10 +3,14 @@ import axios from "axios";
 import { MdSearch, MdOutlineChat } from "react-icons/md";
 import { FaWindowClose } from "react-icons/fa";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
 import Loader from "@/components/Loader";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactMarkDown from "react-markdown";
 import RootLayout from "../layout";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { CameraIcon } from "lucide-react";
 
 // Create your API key here https://aistudio.google.com/app/apikey
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -200,11 +204,6 @@ const Health = ({ toggleChat = () => {} }) => {
                     key={index}
                     className="border border-gray-300 p-2 rounded-md mb-2"
                   >
-                    {/* <img
-                    src={product.imageLink}
-                    alt={product.name}
-                    className="w-full h-24 object-cover rounded-md"
-                  /> */}
                     <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
                     <p className="text-white">{product.Description}</p>
                     <p>
@@ -224,26 +223,32 @@ const Health = ({ toggleChat = () => {} }) => {
               </div>
             )}
             <div className="mt-4">
-              <input
-                className="w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
-                type="text"
-                placeholder="Enter prompt for image"
-                value={prompt}
-                onChange={handlePromptChange}
-              />
-              <input
-                className="w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              <button
+              <div className="flex bg-white rounded-md px-2 justify-between items-center">
+                <input
+                  className="w-full border-none border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
+                  type="text"
+                  placeholder="Enter prompt for image"
+                  value={prompt}
+                  onChange={handlePromptChange}
+                />
+                <Label htmlFor="file">
+                  <CameraIcon className="cursor-pointer"></CameraIcon>
+                </Label>
+                <Input
+                  id="file"
+                  className="w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none hidden"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                ></Input>
+              </div>
+              <Button
                 className="bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
                 onClick={handleImageProcessing}
                 disabled={loading}
               >
                 Process Image
-              </button>
+              </Button>
             </div>
           </div>
         </div>
