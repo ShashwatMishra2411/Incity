@@ -155,7 +155,7 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
       chatHistory[chatHistory.length - 2].parts.join("")
     );
     console.log(process.env.NEXT_PUBLIC_PLACES_URL);
-    router.push(`${process.env.NEXT_PUBLIC_PLACES_URL}/places?query=${key}`);
+    router.push(`/places?query=${key}`);
   }
   return (
     <RootLayout>
