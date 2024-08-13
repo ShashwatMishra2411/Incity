@@ -2,10 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MdOutlineChat } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Import the Generative AI SDK
+import React, { useState, useRef, useEffect } from "react";
+import { MdOutlineChat } from "react-icons/md";
+import { FaWindowClose } from "react-icons/fa";
+import { GoogleGenerativeAI } from "@google/generative-ai"; // Import the Generative AI SDK
+import ReactMarkdown from "react-markdown";
 
 const HealthcareBot = ({ toggleChat = () => {} }) => {
   const [chatHistory, setChatHistory] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [genAI, setGenAI] = useState(null);
   const [chatSession, setChatSession] = useState(null);
@@ -35,6 +40,36 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
           Bot: "If needed, I can suggest additional steps or direct you to professional resources for more comprehensive care."
           7. Closing
           Bot: "Thank you for using the Health Bot. If you have more questions or need further assistance, feel free to ask!"
+          Prompt Instructions for Health Bot:
+
+Introduction:
+
+Start by greeting the user and ask them to describe their current health issue or question in a simple and concise manner.
+Example: "Hello! I'm your Health Bot. What health concern can I help you with today?"
+Collect Health Details:
+
+Prompt the user to provide details about their symptoms without using any formatting.
+Example: "Please describe your symptoms."
+Health Assessment:
+
+Assess the information provided and suggest possible causes or actions in a clear and concise way.
+Example: "Based on what you shared, here's what might be happening and what you can do."
+Symptom Categorization:
+
+Ask the user to categorize their symptoms (e.g., pain, discomfort, unusual symptoms) to better understand their situation.
+Example: "Can you tell me if you're experiencing pain, discomfort, or something else?"
+Health Recommendations:
+
+Provide specific recommendations based on the symptoms, keeping the advice brief and actionable.
+Example: "I suggest you try these steps."
+Further Advice:
+
+If necessary, offer additional advice or suggest resources in a straightforward manner.
+Example: "If this doesn't help, here's what else you can do."
+Closing:
+
+Thank the user and let them know you're available if they have more questions, without any extra formatting or lengthy text.
+Example: "Thank you for using the Health Bot. If you have more questions, I'm here to help!"
         `,
       });
 
@@ -48,7 +83,13 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
       setGenAI(model);
       setChatSession(session);
       setChatHistory([
-        { role: 'model', parts: ['Hi, I am your Health Bot. How can I assist you with your health today?'] }
+        { role: 'model', parts: ['Hi, I am your Health Bot. How can I assist you with your health today?'] },
+        {
+          role: "model",
+          parts: [
+            "Hi, I am your Health Bot. How can I assist you with your health today?",
+          ],
+        },
       ]);
     } catch (error) {
       console.error("Error initializing chatbot:", error);
@@ -87,10 +128,12 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
   };
 
   return (
-    <div className='fixed inset-0 flex items-center justify-center z-20'>
+    <div className="fixed inset-0 flex items-center justify-center z-20">
       <div
-        className='fixed inset-0 bg-gray-900 bg-opacity-75 z-5'
-        onClick={() => { toggleChat(); }}
+        className="fixed inset-0 bg-gray-900 bg-opacity-75 z-5"
+        onClick={() => {
+          toggleChat();
+        }}
       />
       <div ref={chatRef} className='fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono'>
         <button onClick={() => { toggleChat(); }} className='absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono'>
@@ -102,20 +145,20 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
               {`${message.role === 'user' ? 'You' : 'Health Bot'}: ${message.parts.join('')}`}
             </div>
           ))}
-          {loading && <div className='text-center'>Loading...</div>}
+          {loading && <div className="text-center">Loading...</div>}
         </div>
-        <div className='flex items-center justify-between'>
+        <div className="flex items-center justify-between">
           <input
             disabled={loading}
-            className='w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md mt-4 focus:outline-none'
-            placeholder='Type your message'
-            onKeyDown={(e) => (e.key === 'Enter' ? handleChatInput() : null)}
+            className="w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md mt-4 focus:outline-none"
+            placeholder="Type your message"
+            onKeyDown={(e) => (e.key === "Enter" ? handleChatInput() : null)}
             onChange={handleInput}
             value={messageInput}
           />
           <button
             className={`bg-[rgba(29,71,253,1)] px-4 py-2 text-white rounded-md shadow-md hover:bg-[#1d46fdd5] disabled:bg-slate-500 focus:outline-none ml-4`}
-            disabled={messageInput === '' || loading}
+            disabled={messageInput === "" || loading}
             onClick={() => handleChatInput()}
           >
             <MdOutlineChat size={24} />
