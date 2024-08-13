@@ -1,3 +1,7 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { MdOutlineChat } from 'react-icons/md';
+import { FaWindowClose } from 'react-icons/fa';
+import { GoogleGenerativeAI } from '@google/generative-ai'; // Import the Generative AI SDK
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlineChat } from "react-icons/md";
 import { FaWindowClose } from "react-icons/fa";
@@ -22,6 +26,21 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
       const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
         model: "gemini-1.5-flash",
         systemInstruction: `
+          Health Bot Instructions
+          1. Introduction
+          Bot: "Hello! I'm your Health Bot. I'm here to help you with health-related questions and provide guidance on your concerns. Let's start by discussing your current health issue or question."
+          2. Collect Health Details
+          Bot: "Please describe your health concern or symptoms in detail."
+          3. Health Assessment
+          Bot: "Based on the information you provide, I'll assess potential causes and suggest possible actions you can take."
+          4. Symptom Categorization
+          Bot: "Please categorize your symptoms into types such as pain, discomfort, or unusual symptoms."
+          5. Health Recommendations
+          Bot: "To address your health concern, I recommend specific actions or lifestyle changes based on your symptoms."
+          6. Further Advice
+          Bot: "If needed, I can suggest additional steps or direct you to professional resources for more comprehensive care."
+          7. Closing
+          Bot: "Thank you for using the Health Bot. If you have more questions or need further assistance, feel free to ask!"
           Prompt Instructions for Health Bot:
 
 Introduction:
@@ -59,15 +78,16 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
       });
 
       const session = model.startChat({
-        history: chatHistory.map((message) => ({
+        history: chatHistory.map(message => ({
           role: message.role,
-          content: message.parts.join(""),
+          content: message.parts.join(''),
         })),
       });
 
       setGenAI(model);
       setChatSession(session);
       setChatHistory([
+        { role: 'model', parts: ['Hi, I am your Health Bot. How can I assist you with your health today?'] },
         {
           role: "model",
           parts: [
@@ -91,7 +111,7 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
   };
 
   const handleChatInput = async () => {
-    if (messageInput === "" || !genAI || !chatSession) return;
+    if (messageInput === '' || !genAI || !chatSession) return;
 
     setLoading(true);
     try {
@@ -110,10 +130,10 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
 
       setChatHistory([
         ...chatHistory,
-        { role: "user", parts: [messageInput] },
-        { role: "model", parts: [responseText] },
+        { role: 'user', parts: [messageInput] },
+        { role: 'model', parts: [responseText] }
       ]);
-      setMessageInput("");
+      setMessageInput('');
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -129,19 +149,11 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
           toggleChat();
         }}
       />
-      <div
-        ref={chatRef}
-        className="fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono"
-      >
-        <button
-          onClick={() => {
-            toggleChat();
-          }}
-          className="absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono"
-        >
+      <div ref={chatRef} className='fixed w-[32rem] h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono'>
+        <button onClick={() => { toggleChat(); }} className='absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono'>
           <FaWindowClose size={28} />
         </button>
-        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+        <div className='flex flex-col gap-2 h-full overflow-y-auto'>
           {chatHistory.map((message, index) => (
             <div
               key={message.role + index}

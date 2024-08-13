@@ -1,54 +1,167 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 let conversation = null;
-export function initializeChat(message){
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    const model = new GoogleGenerativeAI(geminiApiKey).getGenerativeModel({ model: 'gemini-pro' });
+export function initializeChat(message) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  const model = new GoogleGenerativeAI(geminiApiKey).getGenerativeModel({
+    model: "gemini-pro",
+  });
 
-    const initHistory = [
-        {
-          role : 'user',
-          parts : [message]
-        },
-        {
-          role : 'model',
-          parts : 'Hi, I am Incity. How can I help you.'
-        }
-      ];
-    conversation =  model.startChat({
-      history : initHistory,
-      generationConfig: {
-        maxOutputTokens: 350,
+  const initHistory = [
+    {
+      role: "user",
+      parts: [message],
+    },
+    {
+      role: "model",
+      parts: "Hi, I am Incity. How can I help you.",
+    },
+  ];
+  conversation = model.startChat({
+    history: initHistory,
+    generationConfig: {
+      maxOutputTokens: 350,
+    },
+  });
+  conversation._apiKey = null;
+  return conversation;
+}
+
+export async function sendMessage(message) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  console.log(geminiApiKey);
+  const response = {
+    text: "Something went wrong",
+    conversation: null,
+  };
+  if (!conversation) {
+    // [TODO ] write logix
+    console.log("Conversation Eror");
+    return response;
+  }
+
+  try {
+    conversation._apiKey = geminiApiKey;
+    const result = await conversation.sendMessage(message);
+    console.log(result);
+    response.text = await result.response.text();
+    console.log(response.text);
+    response.conversation = conversation;
+    return response;
+  } catch (error) {
+    console.log(error);
+    response.conversation = conversation;
+    return response;
+  }
+}
+
+export const textGenerator1 = async (message) => {
+  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: `
+Objective: Provide users with health precautionary measures and a list of essential medicines based on the current weather and location data.
+
+Instructions:
+1. Analyze the provided weather data and geographical coordinates (longitude, latitude) to determine the specific location.
+2. Identify the city from the given coordinates.
+3. Generate health precautions:
+ - Suggest specific health precautions based on weather conditions and location.
+ - Include a brief explanation for each precaution on why it is necessary.
+ - Format the precautions in a JSON array with each object containing:
+   - 'Precaution': The specific health measure.
+   - 'Why is it important': Explanation of its relevance to the weather and location.
+4. Generate a list of essential medicines:
+ - Provide a list of medicines suitable for common weather-related health issues.
+ - Include the purpose and recommended dosage for each medicine.
+ - Format the medicine list in a JSON array with each object containing:
+   - 'Medicine Name': The name of the medicine.
+   - 'Purpose': What the medicine is used for.
+   - 'Dosage': Recommended dosage, if applicable.
+5. **Strictly return only JSON-parseable output**:
+ - Provide the output in JSON format with two main sections: "HealthPrecautions" and "MedicineList."
+ - Each section should be an array of JSON objects with the fields described above.
+ - Avoid any additional text, markdown, or explanations.
+
+Example Output:
+
+{
+"HealthPrecautions": [
+  {
+    "Precaution": "Wear a face mask",
+    "Why is it important": "High air pollution levels detected in the city."
+  },
+  {
+    "Precaution": "Stay hydrated",
+    "Why is it important": "High temperatures and low humidity can cause dehydration."
+  }
+],
+"MedicineList": [
+  {
+    "Medicine Name": "Paracetamol",
+    "Purpose": "To reduce fever.",
+    "Dosage": "500 mg every 4-6 hours as needed."
+  },
+  {
+    "Medicine Name": "Antihistamine",
+    "Purpose": "To alleviate allergy symptoms.",
+    "Dosage": "Once daily as needed."
+  }
+]
+}
+    `,
+  });
+
+  const result = await model.generateContent(message);
+  return result.response.text();
+};
+
+export const textGenerator = async (message) => {
+  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: `
+    Objective: Provide users with specific outfit recommendations based on the current weather and location data.
+
+    Instructions:
+    1. Analyze the provided weather data and geographical coordinates (longitude, latitude).
+    2. Based on the weather conditions (e.g., temperature, humidity, precipitation) and location (coordinates), suggest at least 4 local outfits suitable for the day.
+    3. For each recommended outfit, return an array of JSON objects with the following fields:
+       - 'Cloth Name': The name of the specific product from a particular company or store that is famous in the locality according to the coordinates.
+       - 'Category': The type of clothing (e.g., jacket, hat, shoes).
+       - 'Why is it beneficial': An explanation of why this clothing item is suitable given the weather and location.
+       - 'Price': The approximate price of the item in rupees.
+       - 'Popularity': The popularity of the item, possibly based on trends or local preferences.
+    4. **Strictly return a JSON-parseable array**. Do not include any additional text, markdown, or explanations. The output must be in a plain JSON format.
+
+    Example:
+
+    Input: { weatherData: {...}, longitude: xx.xxxx, latitude: yy.yyyy }
+    Output: [
+      {
+        "Cloth Name": "Rain Defender® Jacket",
+        "Category": "Outerwear",
+        "Why is it beneficial": "Perfect for staying dry during heavy rain, common in this region.",
+        "Price": "Rs 95",
+        "Popularity": "Very High"
       },
-    });
-    conversation._apiKey = null;
-    return conversation;
-}
+      {
+        "Cloth Name": "Local Artisan Wool Scarf",
+        "Category": "Accessories",
+        "Why is it beneficial": "Handmade from local wool, ideal for cold mornings.",
+        "Price": "Rs 30",
+        "Popularity": "High"
+      },
+      {
+        "Cloth Name": "Cozy Knit Beanie from Alpine Store",
+        "Category": "Headwear",
+        "Why is it beneficial": "Keeps your head warm during chilly winds.",
+        "Price": "Rs 20",
+        "Popularity": "Medium"
+      }
+    ]
+    `,
+  });
 
-export async function sendMessage(message){
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    console.log(geminiApiKey)
-    const response = {
-        text : 'Something went wrong',
-        conversation : null
-    }
-    if(!conversation) {
-        // [TODO ] write logix
-        console.log('Conversation Eror');
-        return response; 
-    }
-    
-    try {
-        conversation._apiKey = geminiApiKey;
-        const result = await conversation.sendMessage(message);
-        console.log(result)
-        response.text = await result.response.text();;
-        console.log(response.text);
-        response.conversation = conversation;
-        return response;
-    } catch (error) {
-        console.log(error)
-        response.conversation = conversation;
-        return response;
-    }
-    
-}
+  const result = await model.generateContent(message);
+  return result.response.text();
+};
