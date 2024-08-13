@@ -158,64 +158,62 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
   }
   return (
     <RootLayout>
-      <div className="fixed inset-0 flex items-center justify-center z-20">
-        <div
+      {/* <div className="fixed inset-0 flex items-center justify-center z-20"> */}
+      {/* <div
           className="fixed inset-0 bg-gray-900 bg-opacity-75 z-5"
           onClick={() => {
             toggleChat();
           }}
-        />
-        <div
-          ref={chatRef}
-          className="fixed w-[32rem] flex flex-col h-[40rem] backdrop-blur-lg border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70 font-Mono"
-        >
-          <button
-            onClick={() => {
-              toggleChat();
-            }}
-            className="absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono"
-          >
-            {/* <FaWindowClose size={28} /> */}
-          </button>
-          <div className="flex flex-col gap-2 h-full overflow-y-auto">
-            {chatHistory.map((message, index) => (
-              <div
-                key={message.role + index}
-                className={`text-xl ${
-                  message.role === "user" ? "text-fuchsia-500" : "text-cyan-300"
-                } snap-end`}
-              >
-                <ReactMarkdown>
-                  {`${
-                    message.role === "user" ? "You" : "Health Bot"
-                  }: ${message.parts.join("")}`}
-                </ReactMarkdown>
-              </div>
-            ))}
-            {loading && <div className="text-center">Loading...</div>}
-          </div>
-          <div className="flex items-center justify-center">
-            <input
-              disabled={loading}
-              className="w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md h-full focus:outline-none"
-              placeholder="Type your message"
-              onKeyDown={(e) => (e.key === "Enter" ? handleChatInput() : null)}
-              onChange={handleInput}
-              value={messageInput}
-            />
-            <button
-              className={`bg-[rgba(29,71,253,1)] px-4 py-2 text-white h-full rounded-md shadow-md hover:bg-[#1d46fdd5] disabled:bg-slate-500 focus:outline-none`}
-              disabled={messageInput === "" || loading}
-              onClick={() => handleChatInput()}
+        /> */}
+      <div
+        ref={chatRef}
+        className=" w-full flex flex-col h-full backdrop-blur-lg border bg-black bg-opacity-100  border-zinc-600 p-4 shadow-md z-70 font-Mono"
+      >
+        <button
+          onClick={() => {
+            toggleChat();
+          }}
+          className="absolute -top-5 -right-5 z-10 text-red-500 p-2 font-mono"
+        ></button>
+        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+          {chatHistory.map((message, index) => (
+            <div
+              key={message.role + index}
+              className={`text-xl ${
+                message.role === "user" ? "text-fuchsia-500" : "text-green-400"
+              } snap-end`}
             >
-              <MdOutlineChat size={24} />
-            </button>
-            <Button onClick={handleClick} className="text-red-500 underline">
-              <HospitalIcon></HospitalIcon>
-            </Button>
-          </div>
+              <ReactMarkdown>
+                {`${
+                  message.role === "user" ? "You" : "Health Bot"
+                }: ${message.parts.join("")}`}
+              </ReactMarkdown>
+            </div>
+          ))}
+          {loading && <div className="text-center">Loading...</div>}
+        </div>
+        <div className="flex items-center justify-center">
+          <input
+            disabled={loading}
+            className="w-full border border-gray-300 px-3 py-2 text-gray-700 rounded-md h-full focus:outline-none"
+            placeholder="Type your message"
+            onKeyDown={(e) => (e.key === "Enter" ? handleChatInput() : null)}
+            onChange={handleInput}
+            value={messageInput}
+          />
+          <button
+            className={`bg-[rgba(29,71,253,1)] px-4 py-2 text-white h-full rounded-md shadow-md hover:bg-[#1d46fdd5] disabled:bg-slate-500 focus:outline-none`}
+            disabled={messageInput === "" || loading}
+            onClick={() => handleChatInput()}
+          >
+            <MdOutlineChat size={24} />
+          </button>
+          <Button onClick={handleClick} className="text-red-500 underline">
+            <HospitalIcon></HospitalIcon>
+          </Button>
         </div>
       </div>
+      {/* </div> */}
     </RootLayout>
   );
 };
