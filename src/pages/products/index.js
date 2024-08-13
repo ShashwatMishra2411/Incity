@@ -132,6 +132,11 @@ const Health = ({ toggleChat = () => {} }) => {
     }
   };
 
+  const { Place } = google.maps.importLibrary('places');
+
+// Use a place ID to create a new Place instance.
+
+
   const handlePromptChange = (event) => {
     setPrompt(event.target.value);
   };
@@ -209,12 +214,13 @@ const Health = ({ toggleChat = () => {} }) => {
                   key={index}
                   className="border border-gray-300 p-2 rounded-md mb-2"
                 >
-                  <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
+                  <a href={`/places?query=${product.name.replace(/\s+/g, '_')}`}><h3 className="mt-2 text-lg font-bold">{product.name}</h3>
                   <p className="text-white">{product.Description}</p>
                   <p>
                     <strong>Benefit:</strong>{" "}
                     {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
                   </p>
+                  </a>
                   <a
                     href={product.ProductLink}
                     target="_blank"
