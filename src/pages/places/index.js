@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { FaSearch } from 'react-icons/fa'; // Import search icon
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Ensure this is correctly imported
 import { useSearchParams } from 'next/navigation';
+import RootLayout from '../layout';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API;
 
@@ -423,8 +424,9 @@ const typeref = {
   };
 
   return (
+    <RootLayout>
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Current Location</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Current Location</h1>
       {currentLocation ? (
         <div className="mb-4">
           <p className="text-lg"><strong>Latitude:</strong> {currentLocation.lat}</p>
@@ -432,7 +434,7 @@ const typeref = {
         </div>
       ) : (
         <p>Fetching location...</p>
-      )}
+      )} */}
 
       <form onSubmit={handleSearch} className="text-black flex items-center mb-4">
         <input
@@ -485,6 +487,7 @@ const typeref = {
         <p>No nearby places found.</p>
       )}
     </div>
+    </RootLayout>
   );
 }
 

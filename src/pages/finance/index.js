@@ -100,7 +100,7 @@ const FinanceBot = ({ toggleChat = () => {} }) => {
       /> */}
       <div
         ref={chatRef}
-        className="w-full h-full flex flex-col backdrop-blur-lg border bg-black border-zinc-600 p-4 shadow-md z-70 font-Mono"
+        className="w-full h-[100vh] flex flex-col justify-between backdrop-blur-lg border bg-black border-zinc-600 p-4 shadow-md z-70 font-Mono"
       >
         <button
           onClick={() => {
@@ -110,7 +110,7 @@ const FinanceBot = ({ toggleChat = () => {} }) => {
         >
           {/* <FaWindowClose size={28} /> */}
         </button>
-        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+        <div className="flex flex-col gap-2 overflow-y-auto">
           {chatHistory.map((message, index) => (
             <div
               key={message.role + index}

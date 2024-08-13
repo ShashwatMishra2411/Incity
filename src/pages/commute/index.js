@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Ensure this is correctly imported
 import ReactMarkdown from 'react-markdown';
+import RootLayout from '../layout';
 
 function Commute() {
   const [chat, setChat] = useState([{ type: 'bot', text: 'Please enter your destination:' }]);
@@ -31,7 +32,6 @@ function Commute() {
           setCurrentLocation({ latitude, longitude });
           setChat((prevChat) => [
             ...prevChat,
-            { type: 'bot', text: `Current Location: (${latitude.toFixed(2)}, ${longitude.toFixed(2)})` },
           ]);
         },
         (error) => {
@@ -71,8 +71,6 @@ function Commute() {
         setChat((prevChat) => [
           ...prevChat,
           { type: 'user', text: input },
-          { type: 'bot', text: `Destination: ${input}` },
-          { type: 'bot', text: `Destination Coordinates: (${lat.toFixed(2)}, ${lng.toFixed(2)})` },
           { type: 'bot', text: 'Choose your mode of transport:', buttons: ['Public'] },
         ]);
       } catch (error) {
@@ -89,7 +87,7 @@ function Commute() {
       if (currentLocation && destinationLat && destinationLng) {
         setChat((prevChat) => [
           ...prevChat,
-          { type: 'bot', text: `Using coordinates:\nCurrent Location: (${currentLocation.latitude.toFixed(2)}, ${currentLocation.longitude.toFixed(2)})\nDestination: (${destinationLat.toFixed(2)}, ${destinationLng.toFixed(2)})` },
+          // { type: 'bot', text: `Using coordinates:\nCurrent Location: (${currentLocation.latitude.toFixed(2)}, ${currentLocation.longitude.toFixed(2)})\nDestination: (${destinationLat.toFixed(2)}, ${destinationLng.toFixed(2)})` },
         ]);
         setTransportMode('Public');
       } else {
@@ -246,6 +244,7 @@ function Commute() {
   };
 
   return (
+    <RootLayout>
     <div className="flex flex-col h-screen text-black">
       <div className="flex-1 overflow-y-scroll bg-gray-100 p-4 border border-gray-300">
         {chat.map((message, index) => (
@@ -268,12 +267,12 @@ function Commute() {
             </div>
           </div>
         ))}
-        {currentLocation && destinationLat && destinationLng && (
+        {/* {currentLocation && destinationLat && destinationLng && (
           <div className="mt-4 p-3 bg-gray-200 border border-gray-300 rounded-lg">
             <p className="m-0 text-gray-700">Current Location Coordinates: ({currentLocation.latitude.toFixed(2)}, {currentLocation.longitude.toFixed(2)})</p>
             <p className="m-0 text-gray-700">Destination Coordinates: ({destinationLat.toFixed(2)}, {destinationLng.toFixed(2)})</p>
           </div>
-        )}
+        )} */}
       </div>
       <div className="p-4 bg-gray-200 border-t border-gray-300">
         <input
@@ -296,6 +295,7 @@ function Commute() {
         </button>
       </div>
     </div>
+    </RootLayout>
   );
 }
 
