@@ -8,9 +8,9 @@ import { Phone as ContactIcon } from "lucide-react";
 
 export const routes = [
   {
-    label: "Maps",
+    label: "Places",
     icon: MapIcon,
-    href: "/maps",
+    href: "/places",
     color: "#3498DB", // blue
   },
   {

@@ -1,7 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MdOutlineChat } from 'react-icons/md';
-import { FaWindowClose } from 'react-icons/fa';
-import { GoogleGenerativeAI } from '@google/generative-ai'; // Import the Generative AI SDK
+
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlineChat } from "react-icons/md";
 import { FaWindowClose } from "react-icons/fa";

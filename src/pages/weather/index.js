@@ -101,10 +101,10 @@ export default function Weather() {
 
   return (
     <RootLayout>
-      <div className="min-h-screen w-full bg-black/80 flex-col gap-2 flex items-center justify-center">
+      <div className="h-[100vh] w-full overflow-y-scroll bg-gray-900 flex flex-col items-center p-4">
         {data && (
-          <div className="flex flex-col bg-white rounded p-4 w-full max-w-xs">
-            <div className="font-bold text-xl">Your Location</div>
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mb-5">
+            <div className="font-bold text-xl text-gray-800">Your Location</div>
             <div className="text-sm text-gray-500">
               {data.current.time.toLocaleDateString("en-US", {
                 month: "long",
@@ -113,7 +113,7 @@ export default function Weather() {
               })}{" "}
               {data.current.time.toLocaleTimeString("en-US")}
             </div>
-            <div className="mt-6 text-6xl self-center inline-flex items-center justify-center rounded-lg text-indigo-400 h-24 w-24">
+            <div className="mt-6 text-6xl flex flex-col items-center justify-center mx-auto rounded-lg text-indigo-400 h-24 w-24">
               <svg
                 className="w-32 h-32"
                 fill="none"
@@ -175,18 +175,18 @@ export default function Weather() {
             </div>
           </div>
         )}
-        <div className=" flex justify-center items-center h-full w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
           {res && (
-            <div className="flex flex-col justify-between items-center h-full w-full">
-              <h1 className="text-4xl font-extrabold text-cyan-300">
+            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+              <h1 className="text-4xl font-extrabold text-cyan-300 mb-4">
                 Recommended Outfits
               </h1>
               <Outfit outfits={res.message}></Outfit>
             </div>
           )}
           {res1 && (
-            <div className="flex h-full flex-col justify-between items-center w-full">
-              <h1 className="text-4xl font-extrabold text-cyan-300">
+            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-between h-full">
+              <h1 className="text-4xl font-extrabold text-cyan-300 mb-4">
                 Wellness Measures
               </h1>
               <HealthCard
