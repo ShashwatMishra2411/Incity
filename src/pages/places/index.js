@@ -456,8 +456,14 @@ function Hotels() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {places.map((place) => (
             <div key={place.place_id} className="card p-4 bg-white border border-gray-200 rounded-lg shadow-md">
-              <h2 className="text-lg font-bold text-black">{place.name}</h2>
-              <p className="text-black">{place.vicinity}</p>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&origin=${currentLocation.lat},${currentLocation.lng}&destination=${place.geometry.location.lat()},${place.geometry.location.lng()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <h2 className="text-lg font-bold text-black">{place.name}</h2>
+                <p className="text-black">{place.vicinity}</p>
+              </a>
             </div>
           ))}
         </div>

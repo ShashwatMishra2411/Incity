@@ -10,6 +10,7 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
   const [loading, setLoading] = useState(false);
   const [genAI, setGenAI] = useState(null);
   const [chatSession, setChatSession] = useState(null);
+  const [response, setResponse] = useState(false);
 
   const chatRef = useRef(null);
 
@@ -24,6 +25,8 @@ const HealthcareBot = ({ toggleChat = () => {} }) => {
           Prompt Instructions for Health Bot:
 
 Introduction:
+
+If you feel that the patient is in immediate danger, just return "1" and nothing else.
 
 Start by greeting the user and ask them to describe their current health issue or question in a simple and concise manner.
 Example: "Hello! I'm your Health Bot. What health concern can I help you with today?"
@@ -51,6 +54,7 @@ Closing:
 
 Thank the user and let them know you're available if they have more questions, without any extra formatting or lengthy text.
 Example: "Thank you for using the Health Bot. If you have more questions, I'm here to help!"
+
         `,
       });
 
@@ -93,6 +97,16 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
     try {
       const result = await chatSession.sendMessage(messageInput);
       const responseText = result.response.text();
+
+      if (responseText === "1") {
+        setChatHistory([
+          ...chatHistory,
+          { role: "user", parts: [messageInput] },
+          { role: "model", parts: ["I'm sorry, but I can't help with that. Please contact emergency services or a healthcare professional immediately."] },
+        ]);
+        setResponse(true);
+        return;
+      }
 
       setChatHistory([
         ...chatHistory,
@@ -138,9 +152,11 @@ Example: "Thank you for using the Health Bot. If you have more questions, I'm he
               <ReactMarkdown>
                 {`${message.role === "user" ? "You" : "Health Bot"}: ${message.parts.join("")}`}
               </ReactMarkdown>
+              
             </div>
           ))}
           {loading && <div className="text-center">Loading...</div>}
+          <a href="/places?query=hospital" className="text-red-500 underline">Connect to the nearby hospitals.</a>
         </div>
         <div className="flex items-center justify-between">
           <input
