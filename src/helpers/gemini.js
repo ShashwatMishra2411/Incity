@@ -165,3 +165,31 @@ export const textGenerator = async (message) => {
   const result = await model.generateContent(message);
   return result.response.text();
 };
+
+export async function keyword(message) {
+  console.log(message);
+  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: `
+    Objective: Generate keywords for search queries to be used with the Google Maps API based on the provided message.
+
+    Instructions:
+    1. Analyze the provided message to understand the search context and intent.
+    2. Extract and generate a set of relevant keywords that can be used to perform searches on the Google Maps API.
+    3. The generated keywords should be specific to the context of the message and should be formatted as a comma-separated list.
+    4. **Strictly return only the keywords in plain text format**. Do not include any additional text, explanations, or formatting.
+
+    Example:
+
+    Input: "Suggest some hospitals or clinic for fever"
+    Output: "fever"
+
+    Input: "Suggest some hospitals or clinic for skin rash treatment"
+    Output: "skin_rash"
+    `,
+  });
+
+  const result = await model.generateContent(message);
+  return result.response.text();
+}

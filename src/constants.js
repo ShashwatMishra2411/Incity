@@ -1,4 +1,8 @@
-import { Map as MapIcon, PackageCheck as PackageCheckIcon } from "lucide-react";
+import {
+  Bus,
+  Map as MapIcon,
+  PackageCheck as PackageCheckIcon,
+} from "lucide-react";
 import { HeartPulse as HealthIcon } from "lucide-react";
 import { Utensils as RecipeIcon } from "lucide-react";
 import { Newspaper as NewsIcon } from "lucide-react";
@@ -53,6 +57,12 @@ export const routes = [
     label: "Products",
     icon: PackageCheckIcon,
     href: "/products",
+    color: "#FF9900", // Amazon yellow
+  },
+  {
+    label: "Commute",
+    icon: Bus,
+    href: "/commute",
     color: "#FF9900", // Amazon yellow
   },
 ];
