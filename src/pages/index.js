@@ -49,7 +49,7 @@ export default function Home() {
   }, []);
 
   return (
-    <RootLayout>
+    // <RootLayout>
       <div className="bg-black w-full">
         <Head>
           <link rel="icon" href="/favicon.ico" type="image/x-icon"></link>
@@ -84,16 +84,16 @@ export default function Home() {
             className={`w-full h-auto mb-10 flex items-center justify-center gap-8 text-sm md:text-md lg:text-[1.5rem] font-Mono text-gray-500 z-5`}
           >
             <Link
-              href={`/maps`}
+              href={`/places`}
               className={`hover:text-gray-300 cursor-pointer`}
             >
-              Maps
+              Places
             </Link>
             <Link
               href={`/health`}
               className={`hover:text-gray-300 cursor-pointer`}
             >
-              Health Support
+              Health
             </Link>
             <Link
               href={`/recipes`}
@@ -118,6 +118,12 @@ export default function Home() {
               className={`hover:text-gray-300 cursor-pointer`}
             >
               Finance
+            </Link>
+            <Link
+              href={`/products`}
+              className={`hover:text-gray-300 cursor-pointer`}
+            >
+              Products
             </Link>
             <Link
               href={`/contact`}
@@ -149,6 +155,6 @@ export default function Home() {
           </section>
         </main>
       </div>
-    </RootLayout>
+    // </RootLayout>
   );
 }
