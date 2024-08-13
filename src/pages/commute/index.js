@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai'; // Ensure this is correctly imported
+import ReactMarkdown from 'react-markdown';
 
 function Commute() {
   const [chat, setChat] = useState([{ type: 'bot', text: 'Please enter your destination:' }]);
@@ -121,7 +122,7 @@ function Commute() {
           computeAlternativeRoutes: true,
           transitPreferences: {
             routingPreference: 'LESS_WALKING',
-            allowedTravelModes: ['TRAIN'],
+            allowedTravelModes: ['TRAIN','BUS'],
           },
         },
         {
