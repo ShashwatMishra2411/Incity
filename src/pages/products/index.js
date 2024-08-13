@@ -10,7 +10,8 @@ import ReactMarkDown from "react-markdown";
 import RootLayout from "../layout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { CameraIcon } from "lucide-react";
+import { CameraIcon, PackageCheck } from "lucide-react";
+import Heading from "@/components/heading";
 
 // Create your API key here https://aistudio.google.com/app/apikey
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -162,97 +163,99 @@ const Health = ({ toggleChat = () => {} }) => {
       console.log(error);
     }
   };
-
+  // title,
+  // description,
+  // icon: Icon,
+  // iconColor,
+  // bgColor,
   return (
     <RootLayout>
-      <div className="fixed inset-0 flex items-center pl-72 justify-center z-20">
-        <div
-          className="fixed inset-0 bg-gray-900 bg-opacity-75 z-5"
+      <div
+        ref={chatRef}
+        className=" w-full h-full flex flex-col backdrop-blur-lg bg-black bg-opacity-75 border border-zinc-600 p-0 shadow-md z-70"
+      >
+        <Heading
+          title="Product"
+          description="This model recommends products from the image"
+          icon={PackageCheck}
+          iconColor="text-[#FF9900]"
+          bgColor=""
+        ></Heading>
+        <button
           onClick={() => {
             toggleChat();
           }}
-        />
-        <div
-          ref={chatRef}
-          className="fixed w-[40rem] h-[40rem] backdrop-blur-lg bg-black/10 border bg-zinc-900/500 border-zinc-600 p-4 rounded-lg shadow-md z-70"
+          className="absolute -top-5 -right-5 z-10 text-red-500 p-2"
         >
-          <button
-            onClick={() => {
-              toggleChat();
-            }}
-            className="absolute -top-5 -right-5 z-10 text-red-500 p-2"
-          >
-            <FaWindowClose size={28} />
-          </button>
-          <div className="flex flex-col gap-2 h-full overflow-y-auto">
-            {chatHistory.map((message, index) => (
-              <div
-                key={index}
-                className={`text-xl ${
-                  message.role === "user" ? "text-fuchsia-500" : "text-cyan-300"
-                }`}
-              >
-                {message.parts}
-              </div>
-            ))}
-            {loading && <Loader />}
-            {error && <div className="text-red-500">{error}</div>}
-            {response && (
-              <div className="text-cyan-300">
-                {response.map((product, index) => (
-                  <div
-                    key={index}
-                    className="border border-gray-300 p-2 rounded-md mb-2"
-                  >
-                    <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
-                    <p className="text-white">{product.Description}</p>
-                    <p>
-                      <strong>Benefit:</strong>{" "}
-                      {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
-                    </p>
-                    <a
-                      href={product.ProductLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      Buy Now
-                    </a>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="mt-4">
-              <div className="flex bg-white rounded-md px-2 justify-between items-center">
-                <input
-                  className="w-full border-none border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
-                  type="text"
-                  placeholder="Enter prompt for image"
-                  value={prompt}
-                  onChange={handlePromptChange}
-                />
-                <Label htmlFor="file">
-                  <CameraIcon className="cursor-pointer"></CameraIcon>
-                </Label>
-                <Input
-                  id="file"
-                  className="w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none hidden"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                ></Input>
-              </div>
-              <Button
-                className="bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
-                onClick={handleImageProcessing}
-                disabled={loading}
-              >
-                Process Image
-              </Button>
+          {/* <FaWindowClose size={28} /> */}
+        </button>
+        <div className="flex p-2 flex-col gap-2 h-full overflow-y-auto">
+          {chatHistory.map((message, index) => (
+            <div
+              key={index}
+              className={`text-xl ${
+                message.role === "user" ? "text-fuchsia-500" : "text-white"
+              }`}
+            >
+              {message.parts}
             </div>
-          </div>
+          ))}
+          {loading && <Loader />}
+          {error && <div className="text-red-500">{error}</div>}
+          {response && (
+            <div className="text-white">
+              {response.map((product, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-300 p-2 rounded-md mb-2"
+                >
+                  <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
+                  <p className="text-white">{product.Description}</p>
+                  <p>
+                    <strong>Benefit:</strong>{" "}
+                    {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
+                  </p>
+                  <a
+                    href={product.ProductLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Buy Now
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+        <div className="flex p-2 bg-white rounded-md px-2 justify-between items-center">
+          <input
+            className="w-full border-none border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none"
+            type="text"
+            placeholder="Enter prompt for image"
+            value={prompt}
+            onChange={handlePromptChange}
+          />
+          <Label htmlFor="file">
+            <CameraIcon className="cursor-pointer"></CameraIcon>
+          </Label>
+          <Input
+            id="file"
+            className="w-full mt-2 border border-gray-300 px-3 py-2 text-gray-700 rounded-md focus:outline-none hidden"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+          ></Input>
+        </div>
+        <Button
+          className="bg-green-500 px-4 py-2 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-4"
+          onClick={handleImageProcessing}
+          disabled={loading}
+        >
+          Process Image
+        </Button>
       </div>
+      {/* </div> */}
     </RootLayout>
   );
 };
