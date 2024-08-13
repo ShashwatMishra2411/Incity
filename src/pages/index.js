@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef } from "react";
 import { useEffect, useState } from "react";
-import Chatbot from "@/components/Chatbot";
-import Sidebar from "@/components/Sidebar";
-import RootLayout from "./layout";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import logo from "../../public/logo.png";
 
 export default function Home() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const headRef = useRef();
@@ -48,9 +49,10 @@ export default function Home() {
   useEffect(() => {
     randomEffect();
   }, []);
-  console.log(routes);
+
+  console.log(logo.src); // Check if the logo source is correct
+
   return (
-    // <RootLayout>
     <div className="bg-black w-full">
       <Head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon"></link>
@@ -72,68 +74,28 @@ export default function Home() {
       <main
         className={`min-h-screen flex max-w-[100vw] flex-col items-center justify-center px-4 md:px-20 lg:px-24 py-10 lg:py-24 relative`}
       >
-        {/* <div
-            onClick={handleResume}
-            className={`absolute w-16 md:w-24 aspect-square object-contain bottom-10 right-6 bg-transparent cursor-pointer text-white hover:scale-110 animate-spin-slow hover:animate-spin-slower`}
-          >
-            <img src="/hire.png" alt="hire me" className={`h-full`} />
-          </div>
-          {isOpen ? (
-            <Chatbot toggleChat={toggleChat} geminiApiKey={GEMINI_API_KEY} />
-          ) : null} */}
         <section
-          className={`w-full h-auto mb-10 flex items-center justify-center gap-8 text-sm md:text-md lg:text-[1.5rem] font-Mono text-white z-5`}
+          className={`w-full h-auto mb-10 flex flex-wrap items-center justify-center gap-8 text-sm md:text-md lg:text-[1.5rem] font-Mono text-white z-5`}
         >
-          {/* <Link
-              href={`/maps`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Places
-            </Link>
-            <Link
-              href={`/health`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Health
-            </Link>
-            <Link
-              href={`/recipes`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Recipes
-            </Link>
-            <Link
-              href={`/news`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              News
-            </Link>
-            <Link
-              href={`/weather`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Weather
-            </Link>
-            <Link
-              href={`/finance`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Finance
-            </Link>
-            <Link
-              href={`/products`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Products
-            </Link>
-            <Link
-              href={`/contact`}
-              className={`hover:text-gray-300 cursor-pointer`}
-            >
-              Contact
-            </Link> */}
           {routes.map((route) => {
-            return <Link href={route.href}>{route.label}</Link>;
+            return (
+              <Link
+                className={cn(
+                  "text-xl group flex p-3 justify-start font-bold cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                  pathname === route.href ? "bg-white/10" : ""
+                )}
+                href={route.href}
+                key={route.href}
+              >
+                <div className="flex items-center flex-1 ">
+                  <route.icon
+                    color={route.color}
+                    className={cn(`h-5 w-5 mr-3`)}
+                  />
+                  {route.label}
+                </div>
+              </Link>
+            );
           })}
         </section>
         <section
@@ -151,14 +113,13 @@ export default function Home() {
             weather. <br />
             <span
               className={`text-gray-50 cursor-pointer font-Mono`}
-              onClick={redirect}
+              // onClick={redirect}
             >
-              👉 BUIDL of New Gemini Version Product 👈
+              👉 Connecting newbies to a new city 👈
             </span>
           </p>
         </section>
       </main>
     </div>
-    // </RootLayout>
   );
 }
