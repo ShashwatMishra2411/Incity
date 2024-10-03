@@ -114,8 +114,20 @@ const Health = () => {
                     <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
                     <p className="text-white">{product.Description}</p>
                     <p>
-                      <strong>Benefit:</strong>{" "}
+                      <strong>Benefit:</strong>
                       {product.HowItwouldBenefitTheSpaceProvidedIntheImage}
+                    </p>
+                    <p className="text-white">
+                      <strong>Price: </strong>
+                      {product.price}
+                    </p>
+                    <p className="text-white">
+                      <strong>Shop Name: </strong>
+                      {product.shopName}
+                    </p>
+                    <p className="text-white">
+                      <strong>Address: </strong>
+                      {product.shopAddress}
                     </p>
                   </a>
                   <a
