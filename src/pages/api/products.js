@@ -6,7 +6,7 @@ const handler = async (req, res) => {
       // console.log(req);
       // console.log(req.body);
       const { prompt, imageParts } = req.body;
-      console.log(prompt, imageParts);
+      // console.log(prompt, imageParts);
       const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       const genAI = new GoogleGenerativeAI(API_KEY);
       const generationConfig = {
